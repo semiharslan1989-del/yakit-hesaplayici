@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<meta name="theme-color" content="#1a1a2e" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="default" />
+<meta name="apple-mobile-web-app-title" content="Yakıt Hesap" />
+<meta name="description" content="Türkiye içi yakıt tüketimi ve maliyet hesaplama uygulaması" />
+<link rel="manifest" href="manifest.json" />
+<title>Yakıt Hesaplayıcı</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  :root {
+    --primary: #2563eb;
+    --primary-light: #dbeafe;
+    --primary-dark: #1d4ed8;
+    --surface: #ffffff;
+    --surface2: #f8fafc;
+    --surface3: #f1f5f9;
+    --border: #e2e8f0;
+    --text: #0f172a;
+    --text2: #64748b;
+    --text3: #94a3b8;
+    --success: #16a34a;
+    --success-light: #dcfce7;
+    --radius: 14px;
+    --radius-sm: 9px;
+  }
+  html, body { height: 100%; background: var(--surface2); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; color: var(--text); font-size: 15px; }
+
+  .topbar { position: sticky; top: 0; z-index: 10; background: var(--surface); border-bottom: 1px solid var(--border); padding: 14px 18px 12px; display: flex; align-items: center; gap: 10px; }
+  .topbar-icon { font-size: 22px; }
+  .topbar h1 { font-size: 18px; font-weight: 700; color: var(--text); }
+  .topbar p { font-size: 12px; color: var(--text2); margin-top: 1px; }
+
+  .scroll { overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 14px 14px 100px; display: flex; flex-direction: column; gap: 12px; }
+
+  .card { background: var(--surface); border-radius: var(--radius); border: 1px solid var(--border); padding: 14px 16px; }
+  .card-title { font-size: 12px; font-weight: 600; color: var(--text2); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 12px; }
+
+  .fuel-tabs { display: flex; gap: 6px; }
+  .tab { flex: 1; padding: 9px 4px; border: 1.5px solid var(--border); border-radius: var(--radius-sm); background: transparent; font-size: 13px; color: var(--text2); cursor: pointer; text-align: center; font-weight: 500; transition: all 0.15s; }
+  .tab.active { background: var(--primary-light); color: var(--primary-dark); border-color: var(--primary); font-weight: 700; }
+
+  .field { margin-top: 12px; }
+  .field label { display: block; font-size: 12px; color: var(--text2); margin-bottom: 5px; font-weight: 500; }
+  .field input, .field select { width: 100%; background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 10px 12px; font-size: 15px; color: var(--text); outline: none; -webkit-appearance: none; appearance: none; }
+  .field select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2364748b' d='M6 8L1 3h10z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; padding-right: 32px; }
+  .field input:focus, .field select:focus { border-color: var(--primary); background: #fff; }
+  .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .row3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+
+  .result-card { background: var(--primary); border-radius: var(--radius); padding: 20px 16px 16px; color: #fff; }
+  .result-liter { font-size: 48px; font-weight: 800; line-height: 1; }
+  .result-liter span { font-size: 20px; font-weight: 400; opacity: 0.75; }
+  .result-desc { font-size: 13px; opacity: 0.75; margin-top: 4px; min-height: 18px; }
+  .result-stats { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-top: 14px; }
+  .rstat { background: rgba(255,255,255,0.15); border-radius: 10px; padding: 10px 8px; text-align: center; }
+  .rstat-val { font-size: 16px; font-weight: 700; }
+  .rstat-lbl { font-size: 10px; opacity: 0.75; margin-top: 2px; }
+
+  .routes-grid { display: flex; flex-direction: column; gap: 7px; margin-top: 4px; }
+  .route-chip { background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 10px 12px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
+  .route-chip:active { background: var(--primary-light); border-color: var(--primary); }
+  .route-name { font-size: 14px; font-weight: 500; color: var(--text); }
+  .route-km { font-size: 13px; color: var(--text2); }
+
+  .prices-list { display: flex; flex-direction: column; gap: 0; }
+  .price-row { display: flex; justify-content: space-between; align-items: center; padding: 9px 0; border-bottom: 1px solid var(--border); font-size: 14px; }
+  .price-row:last-child { border-bottom: none; }
+  .price-val { font-weight: 600; color: var(--primary); }
+  .note { font-size: 11px; color: var(--text3); margin-top: 8px; }
+
+  .empty-state { text-align: center; padding: 10px 0 6px; }
+  .empty-icon { font-size: 32px; margin-bottom: 6px; }
+  .empty-text { font-size: 14px; color: var(--text2); }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-icon">⛽</div>
+  <div>
+    <h1>Yakıt Hesaplayıcı</h1>
+    <p>Türkiye içi seyahat maliyet hesaplama</p>
+  </div>
+</div>
+
+<div class="scroll">
+
+  <!-- Yakıt Türü -->
+  <div class="card">
+    <div class="card-title">Yakıt Türü ve Fiyat</div>
+    <div class="fuel-tabs">
+      <div class="tab active" onclick="setFuel('benzin')">⛽ Benzin</div>
+      <div class="tab" onclick="setFuel('dizel')">🛢️ Motorin</div>
+      <div class="tab" onclick="setFuel('lpg')">💨 LPG</div>
+    </div>
+    <div class="row2">
+      <div class="field">
+        <label>Yakıt fiyatı (₺/L)</label>
+        <input type="number" id="fuelPrice" value="45.90" step="0.01" inputmode="decimal" oninput="calculate()" />
+      </div>
+      <div class="field">
+        <label>100 km tüketim (L)</label>
+        <input type="number" id="consumption" value="8.0" step="0.1" inputmode="decimal" oninput="calculate()" />
+      </div>
+    </div>
+  </div>
+
+  <!-- Güzergah -->
+  <div class="card">
+    <div class="card-title">Güzergah</div>
+    <div class="row2">
+      <div class="field">
+        <label>Kalkış şehri</label>
+        <select id="fromCity" onchange="onCityChange()"><option value="">Seçiniz...</option></select>
+      </div>
+      <div class="field">
+        <label>Varış şehri</label>
+        <select id="toCity" onchange="onCityChange()"><option value="">Seçiniz...</option></select>
+      </div>
+    </div>
+    <div class="field">
+      <label>Veya mesafeyi girin (km)</label>
+      <input type="number" id="distance" placeholder="Örn: 450" inputmode="numeric" oninput="onDistanceInput()" />
+    </div>
+  </div>
+
+  <!-- Seçenekler -->
+  <div class="card">
+    <div class="card-title">Seçenekler</div>
+    <div class="row3">
+      <div class="field">
+        <label>Kişi sayısı</label>
+        <input type="number" id="people" value="1" min="1" max="9" inputmode="numeric" oninput="calculate()" />
+      </div>
+      <div class="field">
+        <label>Yön</label>
+        <select id="roundtrip" onchange="calculate()">
+          <option value="1">Tek yön</option>
+          <option value="2">Gidiş-dönüş</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Yol tipi</label>
+        <select id="roadtype" onchange="calculate()">
+          <option value="1.0">Karma</option>
+          <option value="0.85">Otoyol</option>
+          <option value="1.2">Şehir içi</option>
+          <option value="1.15">Dağlık</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sonuç -->
+  <div class="result-card" id="resultCard">
+    <div class="empty-state" id="emptyState">
+      <div class="empty-icon">🗺️</div>
+      <div class="empty-text">Güzergah bilgilerini girin</div>
+    </div>
+    <div id="resultContent" style="display:none">
+      <div class="result-liter" id="totalLiter">0.0 <span>litre</span></div>
+      <div class="result-desc" id="resultDesc"></div>
+      <div class="result-stats">
+        <div class="rstat"><div class="rstat-val" id="statCost">—</div><div class="rstat-lbl">Toplam maliyet</div></div>
+        <div class="rstat"><div class="rstat-val" id="statPerPerson">—</div><div class="rstat-lbl">Kişi başı</div></div>
+        <div class="rstat"><div class="rstat-val" id="statKm">—</div><div class="rstat-lbl">Toplam km</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Popüler Güzergahlar -->
+  <div class="card">
+    <div class="card-title">Popüler Güzergahlar</div>
+    <div class="routes-grid" id="routesGrid"></div>
+  </div>
+
+  <!-- Fiyatlar -->
+  <div class="card">
+    <div class="card-title">Güncel Yakıt Fiyatları (2026)</div>
+    <div class="prices-list">
+      <div class="price-row"><span>⛽ Benzin 95</span><span class="price-val">≈ 45,90 ₺/L</span></div>
+      <div class="price-row"><span>🛢️ Motorin</span><span class="price-val">≈ 43,20 ₺/L</span></div>
+      <div class="price-row"><span>💨 LPG (otogaz)</span><span class="price-val">≈ 22,50 ₺/L</span></div>
+    </div>
+    <div class="note">⚠️ Fiyatlar günlük değişir. Manuel güncellemeniz önerilir.</div>
+  </div>
+
+</div>
+
+<script>
+const cities = {
+  "Adana": { lat: 37.00, lon: 35.32 }, "Ankara": { lat: 39.93, lon: 32.86 },
+  "Antalya": { lat: 36.90, lon: 30.70 }, "Bursa": { lat: 40.18, lon: 29.07 },
+  "Denizli": { lat: 37.77, lon: 29.09 }, "Diyarbakır": { lat: 37.91, lon: 40.23 },
+  "Erzurum": { lat: 39.91, lon: 41.27 }, "Eskişehir": { lat: 39.78, lon: 30.52 },
+  "Gaziantep": { lat: 37.07, lon: 37.38 }, "İstanbul": { lat: 41.01, lon: 28.95 },
+  "İzmir": { lat: 38.42, lon: 27.14 }, "Kayseri": { lat: 38.73, lon: 35.49 },
+  "Kocaeli": { lat: 40.77, lon: 29.92 }, "Konya": { lat: 37.87, lon: 32.49 },
+  "Malatya": { lat: 38.35, lon: 38.31 }, "Mersin": { lat: 36.80, lon: 34.63 },
+  "Muğla": { lat: 37.22, lon: 28.36 }, "Samsun": { lat: 41.29, lon: 36.33 },
+  "Şanlıurfa": { lat: 37.16, lon: 38.80 }, "Trabzon": { lat: 41.00, lon: 39.72 },
+  "Van": { lat: 38.49, lon: 43.38 }, "Zonguldak": { lat: 41.46, lon: 31.80 }
+};
+const popularRoutes = [
+  { name: "İstanbul → Ankara", from: "İstanbul", to: "Ankara", km: 454 },
+  { name: "İstanbul → İzmir", from: "İstanbul", to: "İzmir", km: 487 },
+  { name: "Ankara → Antalya", from: "Ankara", to: "Antalya", km: 548 },
+  { name: "İstanbul → Antalya", from: "İstanbul", to: "Antalya", km: 726 },
+  { name: "İzmir → Antalya", from: "İzmir", to: "Antalya", km: 317 },
+  { name: "Ankara → İzmir", from: "Ankara", to: "İzmir", km: 598 },
+  { name: "Bursa → İstanbul", from: "Bursa", to: "İstanbul", km: 155 },
+  { name: "Ankara → Trabzon", from: "Ankara", to: "Trabzon", km: 782 },
+  { name: "Konya → Antalya", from: "Konya", to: "Antalya", km: 360 },
+  { name: "Adana → Mersin", from: "Adana", to: "Mersin", km: 67 },
+];
+const fuelDefaults = { benzin: 45.90, dizel: 43.20, lpg: 22.50 };
+let manualDistance = false;
+
+function toRad(d) { return d * Math.PI / 180; }
+function haversine(c1, c2) {
+  const R = 6371, dLat = toRad(c2.lat - c1.lat), dLon = toRad(c2.lon - c1.lon);
+  const a = Math.sin(dLat/2)**2 + Math.cos(toRad(c1.lat))*Math.cos(toRad(c2.lat))*Math.sin(dLon/2)**2;
+  return Math.round(R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)) * 1.25);
+}
+function setFuel(type) {
+  document.querySelectorAll('.tab').forEach((t,i) => t.classList.toggle('active', ['benzin','dizel','lpg'][i] === type));
+  document.getElementById('fuelPrice').value = fuelDefaults[type].toFixed(2);
+  calculate();
+}
+function onDistanceInput() { manualDistance = true; document.getElementById('fromCity').value = ""; document.getElementById('toCity').value = ""; calculate(); }
+function onCityChange() { manualDistance = false; calculate(); }
+function populateSelects() {
+  const names = Object.keys(cities).sort();
+  ['fromCity','toCity'].forEach(id => {
+    const sel = document.getElementById(id);
+    sel.innerHTML = '<option value="">Seçiniz...</option>' + names.map(n => `<option value="${n}">${n}</option>`).join('');
+  });
+}
+function populateRoutes() {
+  document.getElementById('routesGrid').innerHTML = popularRoutes.map(r =>
+    `<div class="route-chip" onclick="loadRoute('${r.from}','${r.to}',${r.km})">
+      <span class="route-name">${r.name}</span>
+      <span class="route-km">${r.km} km</span>
+    </div>`).join('');
+}
+function loadRoute(from, to, km) {
+  manualDistance = false;
+  document.getElementById('fromCity').value = from;
+  document.getElementById('toCity').value = to;
+  document.getElementById('distance').value = km;
+  calculate();
+}
+function calculate() {
+  const price = parseFloat(document.getElementById('fuelPrice').value) || 0;
+  const cons = parseFloat(document.getElementById('consumption').value) || 0;
+  const people = parseInt(document.getElementById('people').value) || 1;
+  const rt = parseFloat(document.getElementById('roundtrip').value) || 1;
+  const roadFactor = parseFloat(document.getElementById('roadtype').value) || 1.0;
+  const from = document.getElementById('fromCity').value;
+  const to = document.getElementById('toCity').value;
+  let km = 0;
+  if (!manualDistance && from && to && from !== to) {
+    km = haversine(cities[from], cities[to]);
+    document.getElementById('distance').value = km;
+  } else {
+    km = parseFloat(document.getElementById('distance').value) || 0;
+  }
+  const emptyState = document.getElementById('emptyState');
+  const resultContent = document.getElementById('resultContent');
+  if (!km || !price || !cons) { emptyState.style.display='block'; resultContent.style.display='none'; return; }
+  emptyState.style.display = 'none'; resultContent.style.display = 'block';
+  const totalKm = km * rt;
+  const liters = (totalKm * cons * roadFactor / 100);
+  const cost = liters * price;
+  const perPerson = cost / people;
+  document.getElementById('totalLiter').innerHTML = liters.toFixed(1) + ' <span>litre</span>';
+  const rtLabel = rt == 2 ? ' · Gidiş-dönüş' : '';
+  document.getElementById('resultDesc').textContent = (from && to ? from + ' → ' + to : '') + rtLabel;
+  document.getElementById('statCost').textContent = cost.toLocaleString('tr-TR', {maximumFractionDigits:0}) + ' ₺';
+  document.getElementById('statPerPerson').textContent = perPerson.toLocaleString('tr-TR', {maximumFractionDigits:0}) + ' ₺';
+  document.getElementById('statKm').textContent = totalKm.toLocaleString('tr-TR') + ' km';
+}
+populateSelects();
+populateRoutes();
+
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js').catch(() => {});
+}
+</script>
+</body>
+</html>
