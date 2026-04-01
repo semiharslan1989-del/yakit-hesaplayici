@@ -3,149 +3,161 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-<meta name="theme-color" content="#1a1a2e" />
+<meta name="theme-color" content="#0f172a" />
 <meta name="apple-mobile-web-app-capable" content="yes" />
-<meta name="apple-mobile-web-app-status-bar-style" content="default" />
 <meta name="apple-mobile-web-app-title" content="Yakıt Hesap" />
-<meta name="description" content="Türkiye içi yakıt tüketimi ve maliyet hesaplama uygulaması" />
+<meta name="description" content="Türkiye içi yakıt ve elektrik maliyet hesaplama" />
 <link rel="manifest" href="manifest.json" />
 <title>Yakıt Hesaplayıcı</title>
 <style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-  :root {
-    --primary: #2563eb;
-    --primary-light: #dbeafe;
-    --primary-dark: #1d4ed8;
-    --surface: #ffffff;
-    --surface2: #f8fafc;
-    --surface3: #f1f5f9;
-    --border: #e2e8f0;
-    --text: #0f172a;
-    --text2: #64748b;
-    --text3: #94a3b8;
-    --success: #16a34a;
-    --success-light: #dcfce7;
-    --radius: 14px;
-    --radius-sm: 9px;
-  }
-  html, body { height: 100%; background: var(--surface2); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; color: var(--text); font-size: 15px; }
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{
+  --bg:#0f172a;--bg2:#1e293b;--bg3:#334155;
+  --card:#1e293b;--card2:#273548;
+  --border:#334155;--border2:#475569;
+  --text:#f1f5f9;--text2:#94a3b8;--text3:#64748b;
+  --blue:#3b82f6;--blue-d:#1d4ed8;
+  --green:#22c55e;--green-d:#15803d;
+  --amber:#f59e0b;--red:#ef4444;
+  --r:12px;--r2:8px;
+}
+html,body{min-height:100%;background:var(--bg);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:var(--text);font-size:15px}
 
-  .topbar { position: sticky; top: 0; z-index: 10; background: var(--surface); border-bottom: 1px solid var(--border); padding: 14px 18px 12px; display: flex; align-items: center; gap: 10px; }
-  .topbar-icon { font-size: 22px; }
-  .topbar h1 { font-size: 18px; font-weight: 700; color: var(--text); }
-  .topbar p { font-size: 12px; color: var(--text2); margin-top: 1px; }
+.topbar{background:var(--bg2);border-bottom:1px solid var(--border);padding:14px 16px;display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:20}
+.topbar-logo{width:36px;height:36px;background:linear-gradient(135deg,#3b82f6,#6366f1);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.topbar h1{font-size:17px;font-weight:700}
+.topbar p{font-size:11px;color:var(--text2);margin-top:1px}
 
-  .scroll { overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 14px 14px 100px; display: flex; flex-direction: column; gap: 12px; }
+.mode-bar{background:var(--bg2);border-bottom:1px solid var(--border);padding:0 16px;display:flex}
+.mode-tab{flex:1;padding:12px 4px;text-align:center;font-size:13px;font-weight:600;color:var(--text2);border-bottom:2px solid transparent;cursor:pointer;transition:all .15s}
+.mode-tab.active{color:var(--blue);border-bottom-color:var(--blue)}
 
-  .card { background: var(--surface); border-radius: var(--radius); border: 1px solid var(--border); padding: 14px 16px; }
-  .card-title { font-size: 12px; font-weight: 600; color: var(--text2); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 12px; }
+.scroll{padding:14px 14px 100px;display:flex;flex-direction:column;gap:12px}
 
-  .fuel-tabs { display: flex; gap: 6px; }
-  .tab { flex: 1; padding: 9px 4px; border: 1.5px solid var(--border); border-radius: var(--radius-sm); background: transparent; font-size: 13px; color: var(--text2); cursor: pointer; text-align: center; font-weight: 500; transition: all 0.15s; }
-  .tab.active { background: var(--primary-light); color: var(--primary-dark); border-color: var(--primary); font-weight: 700; }
+.card{background:var(--card);border-radius:var(--r);border:1px solid var(--border);padding:14px 16px}
+.card-title{font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:12px}
 
-  .field { margin-top: 12px; }
-  .field label { display: block; font-size: 12px; color: var(--text2); margin-bottom: 5px; font-weight: 500; }
-  .field input, .field select { width: 100%; background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 10px 12px; font-size: 15px; color: var(--text); outline: none; -webkit-appearance: none; appearance: none; }
-  .field select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2364748b' d='M6 8L1 3h10z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; padding-right: 32px; }
-  .field input:focus, .field select:focus { border-color: var(--primary); background: #fff; }
-  .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-  .row3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+.fuel-tabs{display:flex;gap:6px;margin-bottom:12px}
+.ftab{flex:1;padding:9px 4px;border:1.5px solid var(--border2);border-radius:var(--r2);background:transparent;font-size:12px;font-weight:600;color:var(--text2);cursor:pointer;text-align:center;transition:all .15s}
+.ftab.active{background:#1e3a5f;color:#60a5fa;border-color:var(--blue)}
 
-  .result-card { background: var(--primary); border-radius: var(--radius); padding: 20px 16px 16px; color: #fff; }
-  .result-liter { font-size: 48px; font-weight: 800; line-height: 1; }
-  .result-liter span { font-size: 20px; font-weight: 400; opacity: 0.75; }
-  .result-desc { font-size: 13px; opacity: 0.75; margin-top: 4px; min-height: 18px; }
-  .result-stats { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-top: 14px; }
-  .rstat { background: rgba(255,255,255,0.15); border-radius: 10px; padding: 10px 8px; text-align: center; }
-  .rstat-val { font-size: 16px; font-weight: 700; }
-  .rstat-lbl { font-size: 10px; opacity: 0.75; margin-top: 2px; }
+.field{margin-top:10px}
+.field label{display:block;font-size:12px;color:var(--text2);margin-bottom:5px;font-weight:500}
+.field input,.field select{width:100%;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r2);padding:10px 12px;font-size:14px;color:var(--text);outline:none;-webkit-appearance:none;appearance:none}
+.field select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2394a3b8' d='M6 8L1 3h10z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:32px}
+.field input:focus,.field select:focus{border-color:var(--blue)}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
 
-  .routes-grid { display: flex; flex-direction: column; gap: 7px; margin-top: 4px; }
-  .route-chip { background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 10px 12px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
-  .route-chip:active { background: var(--primary-light); border-color: var(--primary); }
-  .route-name { font-size: 14px; font-weight: 500; color: var(--text); }
-  .route-km { font-size: 13px; color: var(--text2); }
+.result-card{border-radius:var(--r);padding:18px 16px 16px;background:linear-gradient(135deg,#1e3a5f,#1a2744)}
+.result-card.electric{background:linear-gradient(135deg,#14532d,#1a3a2a)}
+.result-big{font-size:44px;font-weight:800;line-height:1;color:#fff}
+.result-big span{font-size:18px;font-weight:400;color:rgba(255,255,255,.6)}
+.result-desc{font-size:12px;color:rgba(255,255,255,.55);margin-top:5px;min-height:16px}
+.result-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:14px}
+.rstat{background:rgba(255,255,255,.1);border-radius:10px;padding:10px 8px;text-align:center}
+.rstat-val{font-size:15px;font-weight:700;color:#fff}
+.rstat-lbl{font-size:10px;color:rgba(255,255,255,.55);margin-top:2px}
 
-  .prices-list { display: flex; flex-direction: column; gap: 0; }
-  .price-row { display: flex; justify-content: space-between; align-items: center; padding: 9px 0; border-bottom: 1px solid var(--border); font-size: 14px; }
-  .price-row:last-child { border-bottom: none; }
-  .price-val { font-weight: 600; color: var(--primary); }
-  .note { font-size: 11px; color: var(--text3); margin-top: 8px; }
+.compare-box{background:var(--card2);border-radius:var(--r);border:1px solid var(--border);overflow:hidden;margin-top:4px}
+.compare-row{display:flex;align-items:center;padding:10px 14px;gap:10px;border-bottom:1px solid var(--border)}
+.compare-row:last-child{border-bottom:none}
+.compare-icon{font-size:18px;width:28px;text-align:center}
+.compare-label{flex:1;font-size:13px;color:var(--text2)}
+.compare-val{font-size:14px;font-weight:700}
+.compare-val.cheaper{color:var(--green)}
+.compare-bar-wrap{margin-top:0;padding:0 14px 10px;background:var(--card2)}
+.bar-track{height:6px;background:var(--bg3);border-radius:3px;overflow:hidden}
+.bar-fill{height:100%;border-radius:3px;transition:width .4s}
 
-  .empty-state { text-align: center; padding: 10px 0 6px; }
-  .empty-icon { font-size: 32px; margin-bottom: 6px; }
-  .empty-text { font-size: 14px; color: var(--text2); }
+.routes-grid{display:flex;flex-direction:column;gap:7px;margin-top:4px}
+.route-chip{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r2);padding:10px 12px;cursor:pointer;display:flex;justify-content:space-between;align-items:center}
+.route-chip:active{background:#1e3a5f;border-color:var(--blue)}
+.route-name{font-size:13px;font-weight:600}
+.route-info{display:flex;flex-direction:column;align-items:flex-end;gap:2px}
+.route-km{font-size:12px;color:var(--text2)}
+.route-time{font-size:11px;color:var(--text3)}
+
+.price-row{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid var(--border);font-size:13px;color:var(--text2)}
+.price-row:last-child{border-bottom:none}
+.price-val{font-weight:700;color:var(--blue)}
+
+.info-box{background:var(--bg3);border-radius:var(--r2);padding:10px 12px;font-size:12px;color:var(--text2);margin-top:8px;line-height:1.6}
+.empty{text-align:center;padding:16px 0 8px}
+.empty-icon{font-size:36px;margin-bottom:8px}
+.empty-text{font-size:13px;color:rgba(255,255,255,.4)}
+.hidden{display:none}
 </style>
 </head>
 <body>
 
 <div class="topbar">
-  <div class="topbar-icon">⛽</div>
+  <div class="topbar-logo">⛽</div>
   <div>
     <h1>Yakıt Hesaplayıcı</h1>
     <p>Türkiye içi seyahat maliyet hesaplama</p>
   </div>
 </div>
 
-<div class="scroll">
+<div class="mode-bar">
+  <div class="mode-tab active" onclick="setMode('fuel')">⛽ Yakıtlı</div>
+  <div class="mode-tab" onclick="setMode('electric')">⚡ Elektrikli</div>
+  <div class="mode-tab" onclick="setMode('compare')">⚖️ Karşılaştır</div>
+</div>
 
-  <!-- Yakıt Türü -->
+<!-- YAKITLI -->
+<div id="fuelSection" class="scroll">
   <div class="card">
-    <div class="card-title">Yakıt Türü ve Fiyat</div>
-    <div class="fuel-tabs">
-      <div class="tab active" onclick="setFuel('benzin')">⛽ Benzin</div>
-      <div class="tab" onclick="setFuel('dizel')">🛢️ Motorin</div>
-      <div class="tab" onclick="setFuel('lpg')">💨 LPG</div>
+    <div class="card-title">Araç Seçimi</div>
+    <div class="field"><label>Marka</label>
+      <select id="fuelBrand" onchange="onBrandChange('fuel')"><option value="">— Manuel giriş —</option></select>
+    </div>
+    <div class="field"><label>Model</label>
+      <select id="fuelModel" onchange="onModelChange('fuel')"><option value="">— Model seçin —</option></select>
+    </div>
+    <div class="fuel-tabs" style="margin-top:12px;margin-bottom:0">
+      <div class="ftab active" onclick="setFuel('benzin')">⛽ Benzin</div>
+      <div class="ftab" onclick="setFuel('dizel')">🛢️ Motorin</div>
+      <div class="ftab" onclick="setFuel('lpg')">💨 LPG</div>
     </div>
     <div class="row2">
-      <div class="field">
-        <label>Yakıt fiyatı (₺/L)</label>
+      <div class="field"><label>Yakıt fiyatı (₺/L)</label>
         <input type="number" id="fuelPrice" value="45.90" step="0.01" inputmode="decimal" oninput="calculate()" />
       </div>
-      <div class="field">
-        <label>100 km tüketim (L)</label>
+      <div class="field"><label>100 km tüketim (L)</label>
         <input type="number" id="consumption" value="8.0" step="0.1" inputmode="decimal" oninput="calculate()" />
       </div>
     </div>
   </div>
 
-  <!-- Güzergah -->
   <div class="card">
     <div class="card-title">Güzergah</div>
     <div class="row2">
-      <div class="field">
-        <label>Kalkış şehri</label>
+      <div class="field"><label>Kalkış</label>
         <select id="fromCity" onchange="onCityChange()"><option value="">Seçiniz...</option></select>
       </div>
-      <div class="field">
-        <label>Varış şehri</label>
+      <div class="field"><label>Varış</label>
         <select id="toCity" onchange="onCityChange()"><option value="">Seçiniz...</option></select>
       </div>
     </div>
-    <div class="field">
-      <label>Veya mesafeyi girin (km)</label>
+    <div class="field"><label>Veya mesafe girin (km)</label>
       <input type="number" id="distance" placeholder="Örn: 450" inputmode="numeric" oninput="onDistanceInput()" />
     </div>
   </div>
 
-  <!-- Seçenekler -->
   <div class="card">
     <div class="card-title">Seçenekler</div>
     <div class="row3">
-      <div class="field">
-        <label>Kişi sayısı</label>
+      <div class="field"><label>Kişi sayısı</label>
         <input type="number" id="people" value="1" min="1" max="9" inputmode="numeric" oninput="calculate()" />
       </div>
-      <div class="field">
-        <label>Yön</label>
+      <div class="field"><label>Yön</label>
         <select id="roundtrip" onchange="calculate()">
           <option value="1">Tek yön</option>
           <option value="2">Gidiş-dönüş</option>
         </select>
       </div>
-      <div class="field">
-        <label>Yol tipi</label>
+      <div class="field"><label>Yol tipi</label>
         <select id="roadtype" onchange="calculate()">
           <option value="1.0">Karma</option>
           <option value="0.85">Otoyol</option>
@@ -156,141 +168,417 @@
     </div>
   </div>
 
-  <!-- Sonuç -->
-  <div class="result-card" id="resultCard">
-    <div class="empty-state" id="emptyState">
-      <div class="empty-icon">🗺️</div>
-      <div class="empty-text">Güzergah bilgilerini girin</div>
-    </div>
-    <div id="resultContent" style="display:none">
-      <div class="result-liter" id="totalLiter">0.0 <span>litre</span></div>
-      <div class="result-desc" id="resultDesc"></div>
+  <div class="result-card">
+    <div class="empty" id="fuelEmpty"><div class="empty-icon">🗺️</div><div class="empty-text">Güzergah bilgilerini girin</div></div>
+    <div id="fuelContent" class="hidden">
+      <div class="result-big" id="fuelLiter">— <span>litre</span></div>
+      <div class="result-desc" id="fuelDesc"></div>
       <div class="result-stats">
-        <div class="rstat"><div class="rstat-val" id="statCost">—</div><div class="rstat-lbl">Toplam maliyet</div></div>
-        <div class="rstat"><div class="rstat-val" id="statPerPerson">—</div><div class="rstat-lbl">Kişi başı</div></div>
-        <div class="rstat"><div class="rstat-val" id="statKm">—</div><div class="rstat-lbl">Toplam km</div></div>
+        <div class="rstat"><div class="rstat-val" id="fuelCost">—</div><div class="rstat-lbl">Toplam maliyet</div></div>
+        <div class="rstat"><div class="rstat-val" id="fuelPP">—</div><div class="rstat-lbl">Kişi başı</div></div>
+        <div class="rstat"><div class="rstat-val" id="fuelKm">—</div><div class="rstat-lbl">Mesafe</div></div>
+      </div>
+      <div class="result-stats" style="margin-top:8px">
+        <div class="rstat"><div class="rstat-val" id="fuelTime">—</div><div class="rstat-lbl">Tahmini süre</div></div>
+        <div class="rstat"><div class="rstat-val" id="fuelCO2">—</div><div class="rstat-lbl">CO₂ (kg)</div></div>
+        <div class="rstat"><div class="rstat-val" id="fuelToll">—</div><div class="rstat-lbl">Otoyol tahmini</div></div>
       </div>
     </div>
   </div>
 
-  <!-- Popüler Güzergahlar -->
   <div class="card">
     <div class="card-title">Popüler Güzergahlar</div>
-    <div class="routes-grid" id="routesGrid"></div>
+    <div class="routes-grid" id="fuelRoutes"></div>
   </div>
 
-  <!-- Fiyatlar -->
   <div class="card">
-    <div class="card-title">Güncel Yakıt Fiyatları (2026)</div>
-    <div class="prices-list">
-      <div class="price-row"><span>⛽ Benzin 95</span><span class="price-val">≈ 45,90 ₺/L</span></div>
-      <div class="price-row"><span>🛢️ Motorin</span><span class="price-val">≈ 43,20 ₺/L</span></div>
-      <div class="price-row"><span>💨 LPG (otogaz)</span><span class="price-val">≈ 22,50 ₺/L</span></div>
+    <div class="card-title">Güncel Yakıt Fiyatları</div>
+    <div class="price-row"><span>⛽ Benzin 95</span><span class="price-val" id="priceB">63,49 ₺/L</span></div>
+    <div class="price-row"><span>🛢️ Motorin</span><span class="price-val" id="priceM">77,43 ₺/L</span></div>
+    <div class="price-row"><span>💨 LPG (otogaz)</span><span class="price-val" id="priceL">30,37 ₺/L</span></div>
+    <div class="info-box" id="priceStatus"></div>
+    <div style="font-size:11px;color:var(--text3);margin-top:6px" id="lastUpdate"></div>
+  </div>
+</div>
+
+<!-- ELEKTRİKLİ -->
+<div id="electricSection" class="scroll hidden">
+  <div class="card">
+    <div class="card-title">Elektrikli Araç Seçimi</div>
+    <div class="field"><label>Marka</label>
+      <select id="evBrand" onchange="onBrandChange('ev')"><option value="">— Manuel giriş —</option></select>
     </div>
-    <div class="note">⚠️ Fiyatlar günlük değişir. Manuel güncellemeniz önerilir.</div>
+    <div class="field"><label>Model</label>
+      <select id="evModel" onchange="onModelChange('ev')"><option value="">— Model seçin —</option></select>
+    </div>
+    <div class="row2">
+      <div class="field"><label>Elektrik fiyatı (₺/kWh)</label>
+        <input type="number" id="evPrice" value="4.80" step="0.01" inputmode="decimal" oninput="calculateEV()" />
+      </div>
+      <div class="field"><label>100 km tüketim (kWh)</label>
+        <input type="number" id="evConsumption" value="16.0" step="0.1" inputmode="decimal" oninput="calculateEV()" />
+      </div>
+    </div>
   </div>
 
+  <div class="card">
+    <div class="card-title">Güzergah</div>
+    <div class="row2">
+      <div class="field"><label>Kalkış</label>
+        <select id="evFromCity" onchange="onEVCityChange()"><option value="">Seçiniz...</option></select>
+      </div>
+      <div class="field"><label>Varış</label>
+        <select id="evToCity" onchange="onEVCityChange()"><option value="">Seçiniz...</option></select>
+      </div>
+    </div>
+    <div class="field"><label>Veya mesafe girin (km)</label>
+      <input type="number" id="evDistance" placeholder="Örn: 450" inputmode="numeric" oninput="onEVDistanceInput()" />
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Seçenekler</div>
+    <div class="row3">
+      <div class="field"><label>Kişi sayısı</label>
+        <input type="number" id="evPeople" value="1" min="1" max="9" inputmode="numeric" oninput="calculateEV()" />
+      </div>
+      <div class="field"><label>Yön</label>
+        <select id="evRoundtrip" onchange="calculateEV()">
+          <option value="1">Tek yön</option>
+          <option value="2">Gidiş-dönüş</option>
+        </select>
+      </div>
+      <div class="field"><label>Şarj tipi</label>
+        <select id="chargeType" onchange="calculateEV()">
+          <option value="1.0">Ev şarjı</option>
+          <option value="1.5">AC şarj noktası</option>
+          <option value="2.2">DC hızlı şarj</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <div class="result-card electric">
+    <div class="empty" id="evEmpty"><div class="empty-icon">⚡</div><div class="empty-text">Güzergah bilgilerini girin</div></div>
+    <div id="evContent" class="hidden">
+      <div class="result-big" id="evKwh">— <span>kWh</span></div>
+      <div class="result-desc" id="evDesc"></div>
+      <div class="result-stats">
+        <div class="rstat"><div class="rstat-val" id="evCost">—</div><div class="rstat-lbl">Toplam maliyet</div></div>
+        <div class="rstat"><div class="rstat-val" id="evPP">—</div><div class="rstat-lbl">Kişi başı</div></div>
+        <div class="rstat"><div class="rstat-val" id="evKm">—</div><div class="rstat-lbl">Mesafe</div></div>
+      </div>
+      <div class="result-stats" style="margin-top:8px">
+        <div class="rstat"><div class="rstat-val" id="evTime">—</div><div class="rstat-lbl">Tahmini süre</div></div>
+        <div class="rstat"><div class="rstat-val">0 kg</div><div class="rstat-lbl">CO₂ (direkt)</div></div>
+        <div class="rstat"><div class="rstat-val" id="evStops">—</div><div class="rstat-lbl">Şarj durağı</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Popüler Güzergahlar</div>
+    <div class="routes-grid" id="evRoutes"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Elektrik Fiyatları (2026)</div>
+    <div class="price-row"><span>🏠 Ev şarjı (gece tarife)</span><span class="price-val">≈ 3,20 ₺/kWh</span></div>
+    <div class="price-row"><span>🏠 Ev şarjı (gündüz)</span><span class="price-val">≈ 4,80 ₺/kWh</span></div>
+    <div class="price-row"><span>⚡ AC şarj noktası</span><span class="price-val">≈ 8,50 ₺/kWh</span></div>
+    <div class="price-row"><span>🔋 DC hızlı şarj</span><span class="price-val">≈ 12,00 ₺/kWh</span></div>
+    <div class="info-box">⚡ Şarj fiyatları operatöre ve aboneliğe göre değişir.</div>
+  </div>
+</div>
+
+<!-- KARŞILAŞTIR -->
+<div id="compareSection" class="scroll hidden">
+  <div class="card">
+    <div class="card-title">Karşılaştırma Ayarları</div>
+    <div class="field"><label>Mesafe (km)</label>
+      <input type="number" id="cmpDist" value="454" inputmode="numeric" oninput="calculateCompare()" />
+    </div>
+    <div class="row2">
+      <div class="field"><label>Benzin tüketim (L/100km)</label>
+        <input type="number" id="cmpFuelCons" value="8.0" step="0.1" inputmode="decimal" oninput="calculateCompare()" />
+      </div>
+      <div class="field"><label>Benzin fiyatı (₺/L)</label>
+        <input type="number" id="cmpFuelPrice" value="45.90" step="0.01" inputmode="decimal" oninput="calculateCompare()" />
+      </div>
+    </div>
+    <div class="row2">
+      <div class="field"><label>EV tüketim (kWh/100km)</label>
+        <input type="number" id="cmpEvCons" value="16.0" step="0.1" inputmode="decimal" oninput="calculateCompare()" />
+      </div>
+      <div class="field"><label>Elektrik fiyatı (₺/kWh)</label>
+        <input type="number" id="cmpEvPrice" value="4.80" step="0.01" inputmode="decimal" oninput="calculateCompare()" />
+      </div>
+    </div>
+  </div>
+
+  <div class="compare-box">
+    <div class="compare-row">
+      <span class="compare-icon">⛽</span>
+      <span class="compare-label">Benzinli araç maliyeti</span>
+      <span class="compare-val" id="cmpFuelTotal">—</span>
+    </div>
+    <div class="compare-bar-wrap"><div class="bar-track"><div class="bar-fill" id="cmpFuelBar" style="background:var(--amber);width:100%"></div></div></div>
+    <div class="compare-row">
+      <span class="compare-icon">⚡</span>
+      <span class="compare-label">Elektrikli araç maliyeti</span>
+      <span class="compare-val" id="cmpEvTotal">—</span>
+    </div>
+    <div class="compare-bar-wrap"><div class="bar-track"><div class="bar-fill" id="cmpEvBar" style="background:var(--green);width:60%"></div></div></div>
+    <div class="compare-row" style="background:var(--bg3)">
+      <span class="compare-icon">💰</span>
+      <span class="compare-label">Elektrikli tasarrufu</span>
+      <span class="compare-val cheaper" id="cmpSaving">—</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Yıllık Tasarruf Tahmini</div>
+    <div class="field"><label>Yıllık km</label>
+      <input type="number" id="cmpYearlyKm" value="20000" inputmode="numeric" oninput="calculateCompare()" />
+    </div>
+    <div class="compare-box" style="margin-top:10px">
+      <div class="compare-row">
+        <span class="compare-icon">📅</span>
+        <span class="compare-label">Yıllık benzin maliyeti</span>
+        <span class="compare-val" id="cmpFuelYear">—</span>
+      </div>
+      <div class="compare-row">
+        <span class="compare-icon">📅</span>
+        <span class="compare-label">Yıllık elektrik maliyeti</span>
+        <span class="compare-val" id="cmpEvYear">—</span>
+      </div>
+      <div class="compare-row" style="background:var(--bg3)">
+        <span class="compare-icon">🌱</span>
+        <span class="compare-label">Yıllık CO₂ tasarrufu</span>
+        <span class="compare-val cheaper" id="cmpCO2Year">—</span>
+      </div>
+    </div>
+  </div>
 </div>
 
 <script>
-const cities = {
-  "Adana": { lat: 37.00, lon: 35.32 }, "Ankara": { lat: 39.93, lon: 32.86 },
-  "Antalya": { lat: 36.90, lon: 30.70 }, "Bursa": { lat: 40.18, lon: 29.07 },
-  "Denizli": { lat: 37.77, lon: 29.09 }, "Diyarbakır": { lat: 37.91, lon: 40.23 },
-  "Erzurum": { lat: 39.91, lon: 41.27 }, "Eskişehir": { lat: 39.78, lon: 30.52 },
-  "Gaziantep": { lat: 37.07, lon: 37.38 }, "İstanbul": { lat: 41.01, lon: 28.95 },
-  "İzmir": { lat: 38.42, lon: 27.14 }, "Kayseri": { lat: 38.73, lon: 35.49 },
-  "Kocaeli": { lat: 40.77, lon: 29.92 }, "Konya": { lat: 37.87, lon: 32.49 },
-  "Malatya": { lat: 38.35, lon: 38.31 }, "Mersin": { lat: 36.80, lon: 34.63 },
-  "Muğla": { lat: 37.22, lon: 28.36 }, "Samsun": { lat: 41.29, lon: 36.33 },
-  "Şanlıurfa": { lat: 37.16, lon: 38.80 }, "Trabzon": { lat: 41.00, lon: 39.72 },
-  "Van": { lat: 38.49, lon: 43.38 }, "Zonguldak": { lat: 41.46, lon: 31.80 }
-};
-const popularRoutes = [
-  { name: "İstanbul → Ankara", from: "İstanbul", to: "Ankara", km: 454 },
-  { name: "İstanbul → İzmir", from: "İstanbul", to: "İzmir", km: 487 },
-  { name: "Ankara → Antalya", from: "Ankara", to: "Antalya", km: 548 },
-  { name: "İstanbul → Antalya", from: "İstanbul", to: "Antalya", km: 726 },
-  { name: "İzmir → Antalya", from: "İzmir", to: "Antalya", km: 317 },
-  { name: "Ankara → İzmir", from: "Ankara", to: "İzmir", km: 598 },
-  { name: "Bursa → İstanbul", from: "Bursa", to: "İstanbul", km: 155 },
-  { name: "Ankara → Trabzon", from: "Ankara", to: "Trabzon", km: 782 },
-  { name: "Konya → Antalya", from: "Konya", to: "Antalya", km: 360 },
-  { name: "Adana → Mersin", from: "Adana", to: "Mersin", km: 67 },
-];
-const fuelDefaults = { benzin: 45.90, dizel: 43.20, lpg: 22.50 };
-let manualDistance = false;
+const cities={"Adana":{lat:37.00,lon:35.32},"Afyonkarahisar":{lat:38.76,lon:30.54},"Ankara":{lat:39.93,lon:32.86},"Antalya":{lat:36.90,lon:30.70},"Balıkesir":{lat:39.65,lon:27.89},"Bursa":{lat:40.18,lon:29.07},"Denizli":{lat:37.77,lon:29.09},"Diyarbakır":{lat:37.91,lon:40.23},"Erzurum":{lat:39.91,lon:41.27},"Eskişehir":{lat:39.78,lon:30.52},"Gaziantep":{lat:37.07,lon:37.38},"İstanbul":{lat:41.01,lon:28.95},"İzmir":{lat:38.42,lon:27.14},"Kayseri":{lat:38.73,lon:35.49},"Kocaeli":{lat:40.77,lon:29.92},"Konya":{lat:37.87,lon:32.49},"Malatya":{lat:38.35,lon:38.31},"Mersin":{lat:36.80,lon:34.63},"Muğla":{lat:37.22,lon:28.36},"Samsun":{lat:41.29,lon:36.33},"Şanlıurfa":{lat:37.16,lon:38.80},"Trabzon":{lat:41.00,lon:39.72},"Van":{lat:38.49,lon:43.38},"Zonguldak":{lat:41.46,lon:31.80}};
 
-function toRad(d) { return d * Math.PI / 180; }
-function haversine(c1, c2) {
-  const R = 6371, dLat = toRad(c2.lat - c1.lat), dLon = toRad(c2.lon - c1.lon);
-  const a = Math.sin(dLat/2)**2 + Math.cos(toRad(c1.lat))*Math.cos(toRad(c2.lat))*Math.sin(dLon/2)**2;
-  return Math.round(R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)) * 1.25);
+const carDB={
+  "BYD":{"Atto 3 (EV)":{type:"ev",cons:15.9,battery:60.5},"Han (EV)":{type:"ev",cons:15.6,battery:85.4},"Seal (EV)":{type:"ev",cons:13.9,battery:82.5}},
+  "Dacia":{"Sandero 1.0":{type:"fuel",fuel:"benzin",cons:6.2},"Duster 1.3":{type:"fuel",fuel:"benzin",cons:7.8},"Jogger 1.0":{type:"fuel",fuel:"benzin",cons:6.8}},
+  "Fiat":{"Egea 1.4 Benzin":{type:"fuel",fuel:"benzin",cons:7.0},"Egea 1.6 Dizel":{type:"fuel",fuel:"dizel",cons:5.4}},
+  "Ford":{"Focus 1.5 EcoBoost":{type:"fuel",fuel:"benzin",cons:7.5},"Fiesta 1.1":{type:"fuel",fuel:"benzin",cons:6.3},"Puma 1.0 EcoBoost":{type:"fuel",fuel:"benzin",cons:6.1}},
+  "Honda":{"Civic 1.5 VTEC":{type:"fuel",fuel:"benzin",cons:7.2},"CR-V 1.5":{type:"fuel",fuel:"benzin",cons:8.1}},
+  "Hyundai":{"i20 1.2":{type:"fuel",fuel:"benzin",cons:6.0},"Tucson 1.6 T-GDI":{type:"fuel",fuel:"benzin",cons:8.5},"IONIQ 5 (EV)":{type:"ev",cons:15.1,battery:72.6},"IONIQ 6 (EV)":{type:"ev",cons:14.3,battery:77.4},"Kona Electric (EV)":{type:"ev",cons:14.7,battery:64.8}},
+  "Kia":{"Ceed 1.5 T-GDI":{type:"fuel",fuel:"benzin",cons:7.4},"Sportage 1.6":{type:"fuel",fuel:"benzin",cons:8.3},"EV6 (EV)":{type:"ev",cons:15.0,battery:77.4},"Niro EV (EV)":{type:"ev",cons:15.9,battery:64.8}},
+  "Mercedes":{"A 180":{type:"fuel",fuel:"benzin",cons:7.1},"C 200":{type:"fuel",fuel:"benzin",cons:8.0},"E 220d (Dizel)":{type:"fuel",fuel:"dizel",cons:5.8},"EQA (EV)":{type:"ev",cons:15.7,battery:66.5},"EQS (EV)":{type:"ev",cons:17.5,battery:107.8}},
+  "Opel":{"Astra 1.2":{type:"fuel",fuel:"benzin",cons:6.8},"Corsa 1.2":{type:"fuel",fuel:"benzin",cons:6.1},"Corsa-e (EV)":{type:"ev",cons:14.6,battery:50.0},"Mokka-e (EV)":{type:"ev",cons:15.1,battery:50.0}},
+  "Peugeot":{"208 1.2 PureTech":{type:"fuel",fuel:"benzin",cons:6.0},"308 1.2":{type:"fuel",fuel:"benzin",cons:6.5},"e-208 (EV)":{type:"ev",cons:14.6,battery:50.0},"e-2008 (EV)":{type:"ev",cons:15.5,battery:50.0}},
+  "Renault":{"Clio 1.0 TCe":{type:"fuel",fuel:"benzin",cons:6.2},"Megane 1.3 TCe":{type:"fuel",fuel:"benzin",cons:7.1},"Zoe (EV)":{type:"ev",cons:14.5,battery:52.0},"Megane E-Tech (EV)":{type:"ev",cons:14.5,battery:60.0}},
+  "Skoda":{"Octavia 1.5 TSI":{type:"fuel",fuel:"benzin",cons:7.0},"Fabia 1.0 TSI":{type:"fuel",fuel:"benzin",cons:5.9},"Enyaq iV (EV)":{type:"ev",cons:15.5,battery:82.0}},
+  "Tesla":{"Model 3 (EV)":{type:"ev",cons:13.7,battery:75.0},"Model Y (EV)":{type:"ev",cons:14.9,battery:75.0},"Model S (EV)":{type:"ev",cons:17.5,battery:100.0}},
+  "Togg":{"T10X (EV)":{type:"ev",cons:16.5,battery:88.5},"T10F (EV)":{type:"ev",cons:15.8,battery:88.5}},
+  "Toyota":{"Corolla 1.8 Hybrid":{type:"fuel",fuel:"benzin",cons:4.5},"Yaris 1.5 Hybrid":{type:"fuel",fuel:"benzin",cons:4.1},"RAV4 2.5 Hybrid":{type:"fuel",fuel:"benzin",cons:5.2},"C-HR Hybrid":{type:"fuel",fuel:"benzin",cons:4.8},"bZ4X (EV)":{type:"ev",cons:16.5,battery:71.4}},
+  "Volkswagen":{"Golf 1.0 TSI":{type:"fuel",fuel:"benzin",cons:6.5},"Polo 1.0 TSI":{type:"fuel",fuel:"benzin",cons:5.9},"Passat 1.5 TSI":{type:"fuel",fuel:"benzin",cons:7.8},"ID.3 (EV)":{type:"ev",cons:14.5,battery:77.0},"ID.4 (EV)":{type:"ev",cons:15.4,battery:77.0},"ID.7 (EV)":{type:"ev",cons:14.8,battery:86.0}},
+  "Volvo":{"XC40":{type:"fuel",fuel:"benzin",cons:8.8},"XC60":{type:"fuel",fuel:"benzin",cons:9.2},"C40 Recharge (EV)":{type:"ev",cons:17.5,battery:82.0},"XC40 Recharge (EV)":{type:"ev",cons:18.0,battery:82.0}},
+};
+
+const popularRoutes=[
+  {name:"İstanbul → Ankara",from:"İstanbul",to:"Ankara",km:454},
+  {name:"İstanbul → İzmir",from:"İstanbul",to:"İzmir",km:487},
+  {name:"Ankara → Antalya",from:"Ankara",to:"Antalya",km:548},
+  {name:"İstanbul → Antalya",from:"İstanbul",to:"Antalya",km:726},
+  {name:"İzmir → Antalya",from:"İzmir",to:"Antalya",km:317},
+  {name:"Ankara → İzmir",from:"Ankara",to:"İzmir",km:598},
+  {name:"Bursa → İstanbul",from:"Bursa",to:"İstanbul",km:155},
+  {name:"Ankara → Trabzon",from:"Ankara",to:"Trabzon",km:782},
+  {name:"Konya → Antalya",from:"Konya",to:"Antalya",km:360},
+  {name:"Adana → Mersin",from:"Adana",to:"Mersin",km:67},
+];
+
+const SHEETS_ID='1oecBQH0oxw_j4XW9LDxEunnTUPdUziawFKgO10pFvMI';
+const SHEETS_URL=`https://docs.google.com/spreadsheets/d/${SHEETS_ID}/gviz/tq?tqx=out:json&sheet=Sheet1`;
+let fuelDef={benzin:63.49,dizel:77.43,lpg:30.37};
+
+async function fetchFuelPrices(){
+  const statusEl=document.getElementById('priceStatus');
+  const lastEl=document.getElementById('lastUpdate');
+  try{
+    statusEl.textContent='🔄 Fiyatlar güncelleniyor...';
+    const res=await fetch(SHEETS_URL);
+    const text=await res.text();
+    const json=JSON.parse(text.match(/google\.visualization\.Query\.setResponse\(([\s\S]*?)\);/)[1]);
+    const rows=json.table.rows;
+    const prices={};
+    rows.forEach(r=>{
+      if(r.c[0]&&r.c[1]){
+        prices[r.c[0].v.trim()]=parseFloat(r.c[1].v);
+      }
+    });
+    if(prices.benzin) fuelDef.benzin=prices.benzin;
+    if(prices.motorin) fuelDef.dizel=prices.motorin;
+    if(prices.lpg) fuelDef.lpg=prices.lpg;
+    document.getElementById('fuelPrice').value=fuelDef[curFuel].toFixed(2);
+    document.getElementById('cmpFuelPrice').value=fuelDef.benzin.toFixed(2);
+    document.getElementById('priceB').textContent=fuelDef.benzin.toFixed(2)+' ₺/L';
+    document.getElementById('priceM').textContent=fuelDef.dizel.toFixed(2)+' ₺/L';
+    document.getElementById('priceL').textContent=fuelDef.lpg.toFixed(2)+' ₺/L';
+    const now=new Date();
+    lastEl.textContent='Son güncelleme: '+now.toLocaleTimeString('tr-TR',{hour:'2-digit',minute:'2-digit'});
+    statusEl.textContent='✅ Güncel fiyatlar yüklendi';
+    calculate();calculateCompare();
+    setTimeout(()=>{statusEl.textContent=''},3000);
+  }catch(e){
+    statusEl.textContent='⚠️ Fiyat alınamadı, varsayılan kullanılıyor';
+    setTimeout(()=>{statusEl.textContent=''},4000);
+  }
 }
-function setFuel(type) {
-  document.querySelectorAll('.tab').forEach((t,i) => t.classList.toggle('active', ['benzin','dizel','lpg'][i] === type));
-  document.getElementById('fuelPrice').value = fuelDefaults[type].toFixed(2);
+const co2L={benzin:2.31,dizel:2.64,lpg:1.65};
+let manDist=false,evManDist=false,curFuel="benzin";
+
+function toRad(d){return d*Math.PI/180}
+function hav(c1,c2){const R=6371,dLa=toRad(c2.lat-c1.lat),dLo=toRad(c2.lon-c1.lon),a=Math.sin(dLa/2)**2+Math.cos(toRad(c1.lat))*Math.cos(toRad(c2.lat))*Math.sin(dLo/2)**2;return Math.round(R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a))*1.25)}
+function fmt(n){return n.toLocaleString('tr-TR',{maximumFractionDigits:0})+' ₺'}
+function fmtT(km){const h=Math.floor(km/85),m=Math.round((km%85)/85*60);return h>0?(m>0?h+'s '+m+'dk':h+' saat'):m+' dk'}
+
+function setMode(m){
+  ['fuel','electric','compare'].forEach((s,i)=>{
+    document.getElementById(s+'Section').classList.toggle('hidden',s!==m);
+    document.querySelectorAll('.mode-tab')[i].classList.toggle('active',s===m);
+  });
+  if(m==='compare')calculateCompare();
+}
+
+function setFuel(t){
+  curFuel=t;
+  document.querySelectorAll('.ftab').forEach((x,i)=>x.classList.toggle('active',['benzin','dizel','lpg'][i]===t));
+  document.getElementById('fuelPrice').value=fuelDef[t].toFixed(2);
   calculate();
 }
-function onDistanceInput() { manualDistance = true; document.getElementById('fromCity').value = ""; document.getElementById('toCity').value = ""; calculate(); }
-function onCityChange() { manualDistance = false; calculate(); }
-function populateSelects() {
-  const names = Object.keys(cities).sort();
-  ['fromCity','toCity'].forEach(id => {
-    const sel = document.getElementById(id);
-    sel.innerHTML = '<option value="">Seçiniz...</option>' + names.map(n => `<option value="${n}">${n}</option>`).join('');
+
+function populateSelects(){
+  const names=Object.keys(cities).sort();
+  ['fromCity','toCity','evFromCity','evToCity'].forEach(id=>{
+    document.getElementById(id).innerHTML='<option value="">Seçiniz...</option>'+names.map(n=>`<option value="${n}">${n}</option>`).join('');
   });
 }
-function populateRoutes() {
-  document.getElementById('routesGrid').innerHTML = popularRoutes.map(r =>
-    `<div class="route-chip" onclick="loadRoute('${r.from}','${r.to}',${r.km})">
-      <span class="route-name">${r.name}</span>
-      <span class="route-km">${r.km} km</span>
-    </div>`).join('');
-}
-function loadRoute(from, to, km) {
-  manualDistance = false;
-  document.getElementById('fromCity').value = from;
-  document.getElementById('toCity').value = to;
-  document.getElementById('distance').value = km;
-  calculate();
-}
-function calculate() {
-  const price = parseFloat(document.getElementById('fuelPrice').value) || 0;
-  const cons = parseFloat(document.getElementById('consumption').value) || 0;
-  const people = parseInt(document.getElementById('people').value) || 1;
-  const rt = parseFloat(document.getElementById('roundtrip').value) || 1;
-  const roadFactor = parseFloat(document.getElementById('roadtype').value) || 1.0;
-  const from = document.getElementById('fromCity').value;
-  const to = document.getElementById('toCity').value;
-  let km = 0;
-  if (!manualDistance && from && to && from !== to) {
-    km = haversine(cities[from], cities[to]);
-    document.getElementById('distance').value = km;
-  } else {
-    km = parseFloat(document.getElementById('distance').value) || 0;
-  }
-  const emptyState = document.getElementById('emptyState');
-  const resultContent = document.getElementById('resultContent');
-  if (!km || !price || !cons) { emptyState.style.display='block'; resultContent.style.display='none'; return; }
-  emptyState.style.display = 'none'; resultContent.style.display = 'block';
-  const totalKm = km * rt;
-  const liters = (totalKm * cons * roadFactor / 100);
-  const cost = liters * price;
-  const perPerson = cost / people;
-  document.getElementById('totalLiter').innerHTML = liters.toFixed(1) + ' <span>litre</span>';
-  const rtLabel = rt == 2 ? ' · Gidiş-dönüş' : '';
-  document.getElementById('resultDesc').textContent = (from && to ? from + ' → ' + to : '') + rtLabel;
-  document.getElementById('statCost').textContent = cost.toLocaleString('tr-TR', {maximumFractionDigits:0}) + ' ₺';
-  document.getElementById('statPerPerson').textContent = perPerson.toLocaleString('tr-TR', {maximumFractionDigits:0}) + ' ₺';
-  document.getElementById('statKm').textContent = totalKm.toLocaleString('tr-TR') + ' km';
-}
-populateSelects();
-populateRoutes();
 
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('sw.js').catch(() => {});
+function populateBrands(){
+  const brands=Object.keys(carDB).sort();
+  const fb=brands.filter(b=>Object.values(carDB[b]).some(m=>m.type==='fuel'));
+  const eb=brands.filter(b=>Object.values(carDB[b]).some(m=>m.type==='ev'));
+  document.getElementById('fuelBrand').innerHTML='<option value="">— Manuel giriş —</option>'+fb.map(b=>`<option>${b}</option>`).join('');
+  document.getElementById('evBrand').innerHTML='<option value="">— Manuel giriş —</option>'+eb.map(b=>`<option>${b}</option>`).join('');
 }
+
+function onBrandChange(type){
+  const isEV=type==='ev';
+  const brand=document.getElementById(isEV?'evBrand':'fuelBrand').value;
+  const sel=document.getElementById(isEV?'evModel':'fuelModel');
+  sel.innerHTML='<option value="">— Model seçin —</option>';
+  if(!brand)return;
+  const models=Object.entries(carDB[brand]).filter(([,v])=>isEV?v.type==='ev':v.type==='fuel');
+  sel.innerHTML='<option value="">— Model seçin —</option>'+models.map(([n])=>`<option>${n}</option>`).join('');
+}
+
+function onModelChange(type){
+  const isEV=type==='ev';
+  const brand=document.getElementById(isEV?'evBrand':'fuelBrand').value;
+  const model=document.getElementById(isEV?'evModel':'fuelModel').value;
+  if(!brand||!model)return;
+  const d=carDB[brand][model];
+  if(isEV){document.getElementById('evConsumption').value=d.cons;calculateEV();}
+  else{if(d.fuel)setFuel(d.fuel);document.getElementById('consumption').value=d.cons;calculate();}
+}
+
+function populateRoutes(){
+  const chip=(r,fn)=>`<div class="route-chip" onclick="${fn}"><span class="route-name">${r.name}</span><div class="route-info"><span class="route-km">${r.km} km</span><span class="route-time">${fmtT(r.km)}</span></div></div>`;
+  document.getElementById('fuelRoutes').innerHTML=popularRoutes.map(r=>chip(r,`loadRoute('${r.from}','${r.to}',${r.km})`)).join('');
+  document.getElementById('evRoutes').innerHTML=popularRoutes.map(r=>chip(r,`loadEV('${r.from}','${r.to}',${r.km})`)).join('');
+}
+
+function loadRoute(f,t,km){manDist=false;document.getElementById('fromCity').value=f;document.getElementById('toCity').value=t;document.getElementById('distance').value=km;calculate();}
+function loadEV(f,t,km){evManDist=false;document.getElementById('evFromCity').value=f;document.getElementById('evToCity').value=t;document.getElementById('evDistance').value=km;calculateEV();}
+function onCityChange(){manDist=false;calculate();}
+function onEVCityChange(){evManDist=false;calculateEV();}
+function onDistanceInput(){manDist=true;document.getElementById('fromCity').value='';document.getElementById('toCity').value='';calculate();}
+function onEVDistanceInput(){evManDist=true;document.getElementById('evFromCity').value='';document.getElementById('evToCity').value='';calculateEV();}
+
+function getKm(fId,tId,dId,isMan){
+  const f=document.getElementById(fId).value,t=document.getElementById(tId).value;
+  if(!isMan&&f&&t&&f!==t){const km=hav(cities[f],cities[t]);document.getElementById(dId).value=km;return{km,f,t};}
+  return{km:parseFloat(document.getElementById(dId).value)||0,f,t};
+}
+
+function calculate(){
+  const price=parseFloat(document.getElementById('fuelPrice').value)||0;
+  const cons=parseFloat(document.getElementById('consumption').value)||0;
+  const people=parseInt(document.getElementById('people').value)||1;
+  const rt=parseFloat(document.getElementById('roundtrip').value)||1;
+  const rf=parseFloat(document.getElementById('roadtype').value)||1;
+  const {km,f,t}=getKm('fromCity','toCity','distance',manDist);
+  const empty=document.getElementById('fuelEmpty'),con=document.getElementById('fuelContent');
+  if(!km||!price||!cons){empty.classList.remove('hidden');con.classList.add('hidden');return;}
+  empty.classList.add('hidden');con.classList.remove('hidden');
+  const tkm=km*rt,lit=tkm*cons*rf/100,cost=lit*price;
+  document.getElementById('fuelLiter').innerHTML=lit.toFixed(1)+' <span>litre</span>';
+  document.getElementById('fuelDesc').textContent=(f&&t?f+' → '+t:'')+(rt==2?' · Gidiş-dönüş':'');
+  document.getElementById('fuelCost').textContent=fmt(cost);
+  document.getElementById('fuelPP').textContent=fmt(cost/people);
+  document.getElementById('fuelKm').textContent=tkm.toLocaleString('tr-TR')+' km';
+  document.getElementById('fuelTime').textContent=fmtT(tkm);
+  document.getElementById('fuelCO2').textContent=(lit*(co2L[curFuel]||2.31)).toFixed(1)+' kg';
+  const toll=tkm>100?Math.round(tkm*0.12/5)*5:0;
+  document.getElementById('fuelToll').textContent=toll>0?fmt(toll):'—';
+}
+
+function calculateEV(){
+  const price=parseFloat(document.getElementById('evPrice').value)||0;
+  const cons=parseFloat(document.getElementById('evConsumption').value)||0;
+  const people=parseInt(document.getElementById('evPeople').value)||1;
+  const rt=parseFloat(document.getElementById('evRoundtrip').value)||1;
+  const cf=parseFloat(document.getElementById('chargeType').value)||1;
+  const {km,f,t}=getKm('evFromCity','evToCity','evDistance',evManDist);
+  const empty=document.getElementById('evEmpty'),con=document.getElementById('evContent');
+  if(!km||!price||!cons){empty.classList.remove('hidden');con.classList.add('hidden');return;}
+  empty.classList.add('hidden');con.classList.remove('hidden');
+  const tkm=km*rt,kwh=tkm*cons/100,cost=kwh*price*cf;
+  document.getElementById('evKwh').innerHTML=kwh.toFixed(1)+' <span>kWh</span>';
+  document.getElementById('evDesc').textContent=(f&&t?f+' → '+t:'')+(rt==2?' · Gidiş-dönüş':'');
+  document.getElementById('evCost').textContent=fmt(cost);
+  document.getElementById('evPP').textContent=fmt(cost/people);
+  document.getElementById('evKm').textContent=tkm.toLocaleString('tr-TR')+' km';
+  document.getElementById('evTime').textContent=fmtT(tkm);
+  const stops=Math.max(0,Math.floor(tkm/280));
+  document.getElementById('evStops').textContent=stops>0?stops+' durak':'Gerek yok';
+}
+
+function calculateCompare(){
+  const dist=parseFloat(document.getElementById('cmpDist').value)||0;
+  const fCons=parseFloat(document.getElementById('cmpFuelCons').value)||0;
+  const fPrice=parseFloat(document.getElementById('cmpFuelPrice').value)||0;
+  const eCons=parseFloat(document.getElementById('cmpEvCons').value)||0;
+  const ePrice=parseFloat(document.getElementById('cmpEvPrice').value)||0;
+  const ykm=parseFloat(document.getElementById('cmpYearlyKm').value)||20000;
+  if(!dist)return;
+  const fT=dist*fCons/100*fPrice,eT=dist*eCons/100*ePrice,mx=Math.max(fT,eT);
+  document.getElementById('cmpFuelTotal').textContent=fmt(fT);
+  document.getElementById('cmpEvTotal').textContent=fmt(eT);
+  document.getElementById('cmpSaving').textContent=fmt(Math.abs(fT-eT))+(fT>=eT?' tasarruf':' fazla');
+  document.getElementById('cmpFuelBar').style.width=(fT/mx*100).toFixed(0)+'%';
+  document.getElementById('cmpEvBar').style.width=(eT/mx*100).toFixed(0)+'%';
+  document.getElementById('cmpFuelYear').textContent=fmt(ykm*fCons/100*fPrice);
+  document.getElementById('cmpEvYear').textContent=fmt(ykm*eCons/100*ePrice);
+  document.getElementById('cmpCO2Year').textContent=(ykm*fCons/100*2.31).toFixed(0)+' kg daha az';
+}
+
+populateSelects();
+populateBrands();
+populateRoutes();
+calculateCompare();
+fetchFuelPrices();
+if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js').catch(()=>{});}
 </script>
 </body>
 </html>
